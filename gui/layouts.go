@@ -16,12 +16,8 @@ func (a *GuiApp) makeLayout() {
 }
 
 func (a *GuiApp) layoutInputs() {
-	// tk.Grid(a.inputFrame.TLabel(tk.Txt("Файл:")), tk.Row(0), tk.Column(0), tk.Sticky(tk.W))
 	tk.Grid(a.fileBtn, tk.Row(0), tk.Column(0), tk.Sticky(tk.WE))
 	tk.Grid(a.fileLbl, tk.Row(0), tk.Column(1), tk.Sticky(tk.W))
-	// tk.Grid(a.progres, tk.Row(2), tk.Column(0), tk.Columnspan(4), tk.Sticky(tk.WE))
-	// tk.Grid(tk.TLabel(tk.Txt("Магазин:")), tk.Row(1), tk.Column(0), tk.Padx(0), tk.Pady(5), tk.Sticky(tk.W))
-	tk.Grid(a.magazinCombo, tk.Row(1), tk.Column(0), tk.Sticky(tk.WE))
 
 	tk.GridColumnConfigure(a.inputFrame, 1, tk.Weight(2))
 	tk.GridRowConfigure(a.inputFrame, 0, tk.Pad(5))

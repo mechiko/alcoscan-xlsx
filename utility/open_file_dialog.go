@@ -1,6 +1,9 @@
 package utility
 
 import (
+	"errors"
+	"os"
+
 	"github.com/sqweek/dialog"
 )
 
@@ -46,4 +49,22 @@ func DialogSaveFile() string {
 
 func MessageBox(title, msg string) {
 	dialog.Message("%s", msg).Title(title).Info()
+}
+
+func DialogSelectDir(wd string) (string, error) {
+	if wd == "." {
+		dir, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		wd = dir
+	}
+	directory, err := dialog.Directory().SetStartDir(wd).Title("Выберите папку с файлами данных").Browse()
+	if err != nil {
+		return "", err
+	}
+	if directory == "Cancelled" {
+		return "", errors.New("прерван диалог выбора")
+	}
+	return directory, nil
 }

@@ -55,9 +55,7 @@ func main() {
 
 	var logsOutConfig = map[string][]string{
 		"logger":   {"stdout", filepath.Join(cfg.LogPath(), config.Name)},
-		"echo":     {filepath.Join(cfg.LogPath(), "echo")},
 		"reductor": {filepath.Join(cfg.LogPath(), "reductor")},
-		"true":     {filepath.Join(cfg.LogPath(), "true")},
 	}
 	zl, err := zaplog.New(logsOutConfig, true)
 	if err != nil {
@@ -84,26 +82,15 @@ func main() {
 	app := app.New(cfg, loger, dir)
 	// инициализируем пути необходимые приложению
 	app.CreatePath()
+
 	// создаем редуктор для хранения моделей приложения
 	reductorLogger, err := zl.GetLogger("reductor")
 	if err != nil {
 		errProcessExit("Ошибка получения логера для редуктора", err.Error())
 	}
-
 	if err := reductor.New(reductorLogger.Sugar()); err != nil {
 		errProcessExit("Ошибка создания редуктора", err.Error())
 	}
-
-	loger.Info("start repo")
-	// инициализируем REPO
-	// TODO изменить получение путей из конфига
-	// dbPath := cfg.DbPath()
-	// repoStart := repo.New(app, dbPath)
-	// if len(repoStart.Errors()) > 0 {
-	// 	fullErr := strings.Join(repoStart.Errors(), "\n")
-	// 	errProcessExit("Ошибки запуска репозитория", fullErr)
-	// }
-	// app.SetRepo(repoStart)
 
 	appModel, err := application.New(app, *file)
 	if err != nil {

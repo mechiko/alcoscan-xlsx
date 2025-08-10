@@ -4,10 +4,13 @@ import (
 	"alcoscanxlsx/reductor"
 	"fmt"
 	"path/filepath"
+	"regexp"
 )
 
+var reInDir = regexp.MustCompile(`.*\.csv$`)
+
 // должна выполнятся как gorutine
-func (a *GuiApp) openXlsx(ff string) {
+func (a *GuiApp) openInDir(ff string) {
 	// очистка лога на экране
 	a.logClear <- struct{}{}
 	a.stateIsProcess <- true
@@ -25,32 +28,32 @@ func (a *GuiApp) openXlsx(ff string) {
 	}
 	// сброс модели
 	model.Reset()
-	model.File = ff
+	model.InDir = ff
 	err = reductor.Instance().SetModel(model, false)
 	if err != nil {
 		a.Logger().Errorf("gui openXlsx %w", err)
 	}
-	a.SendLog("открываем файл данных")
-	model, err = a.processing.ReadXlsx()
+	a.SendLog("считываем файлы палет и коробов")
+	err = a.processing.ReadDir(reInDir, model.InDir)
 	if err != nil {
-		a.SendError(fmt.Sprintf("ошибка загрузки заказа: %s", err.Error()))
+		a.SendError(fmt.Sprintf("ошибка загрузки файлов: %s", err.Error()))
 		a.stateStart <- struct{}{}
 		return
 	}
-	a.SendLog("проверяем заказы...")
-	a.processing.Scan()
-	if len(a.processing.Errors()) > 0 {
-		// ошибки проверки данных таблицы выводим в лог
-		for _, e := range a.processing.Errors() {
-			a.SendError(e)
+	a.SendLog("обрабатываем файлы...")
+	err = a.processing.Scan()
+	if err != nil {
+		a.SendError(fmt.Sprintf("ошибка загрузки файлов: %s", err.Error()))
+		if len(a.processing.Errors()) > 0 {
+			// ошибки проверки данных таблицы выводим в лог
+			for _, e := range a.processing.Errors() {
+				a.SendError(e)
+			}
+			a.stateStart <- struct{}{}
+			return
 		}
-		a.stateStart <- struct{}{}
-		return
 	}
-	a.SendLog(fmt.Sprintf("список кодов заказа загружен %d магазинов", len(model.Magazins)))
-	for _, magazin := range model.Magazins {
-		a.SendLog(fmt.Sprintf("магазин %s заказов %d", magazin, len(model.Reestr[magazin])))
-	}
+	a.SendLog("обработаны файлы")
 	// успешное открытие файла
 	a.stateStart <- struct{}{}
 }

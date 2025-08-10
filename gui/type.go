@@ -47,14 +47,12 @@ type GuiApp struct {
 	logClear              chan struct{}
 	stateSelectedFileXlsx chan string
 	stateIsProcess        chan bool
-	stateChangeCombo      chan struct{}
 	yscroll               *tk.Window
 	logText               *tk.TextWidget
 
-	processing   *processing.Processing
-	fileLbl      *tk.TLabelWidget
-	fileBtn      *tk.TButtonWidget
-	magazinCombo *tk.TComboboxWidget
+	processing *processing.Processing
+	fileLbl    *tk.TLabelWidget
+	fileBtn    *tk.TButtonWidget
 
 	progres   *tk.TProgressbarWidget
 	progresCh chan float64
@@ -74,7 +72,6 @@ func New(p *processing.Processing, app domain.Apper) (*GuiApp, error) {
 	a.logClear = make(chan struct{})
 	a.stateSelectedFileXlsx = make(chan string, 2)
 	a.stateIsProcess = make(chan bool, 2)
-	a.stateChangeCombo = make(chan struct{})
 
 	tk.App.IconPhoto(a.icon)
 	tk.ErrorMode = tk.CollectErrors
@@ -146,30 +143,12 @@ func (a *GuiApp) tick() {
 		a.fileBtn.Configure(tk.State("enabled"))
 		a.startButton.Configure(tk.State("disabled"))
 		a.exitButton.Configure(tk.State("enabled"))
-		model, err := GetModel()
-		if err != nil {
-			a.Logger().Errorf("gui tick stateStart get model %w", err)
-			return
-		}
-		a.magazinCombo.Configure(tk.Textvariable("выбери магазин"), tk.Values(model.Magazins))
 	case <-a.stateFinish:
 		// состояние после записи заказов магазина в БД
 		a.progres.Configure(tk.Value(0))
 		a.fileBtn.Configure(tk.State("enabled"))
 		a.startButton.Configure(tk.State("disabled"))
 		a.exitButton.Configure(tk.State("enabled"))
-		model, err := GetModel()
-		if err != nil {
-			a.Logger().Errorf("gui tick stateFinish get model %w", err)
-			return
-		}
-		a.magazinCombo.Configure(tk.Textvariable("выбери магазин"), tk.Values(model.Magazins))
-	// case <-a.stateFinishOpenXlsx:
-	// 	// конечное состояние открытия файла успешно
-	// 	a.progres.Configure(tk.Value(0))
-	// 	a.fileBtn.Configure(tk.State("enabled"))
-	// 	a.startButton.Configure(tk.State("enabled"))
-	// 	a.exitButton.Configure(tk.State("enabled"))
 	case file := <-a.stateSelectedFileXlsx:
 		a.fileLbl.Configure(tk.Txt(file))
 	case a.isProces = <-a.stateIsProcess:
@@ -179,13 +158,6 @@ func (a *GuiApp) tick() {
 		} else {
 			a.fileBtn.Configure(tk.State("enabled"))
 		}
-	case <-a.stateChangeCombo:
-		model, err := GetModel()
-		if err != nil {
-			a.Logger().Errorf("gui tick stateChangeCombo get model %w", err)
-			return
-		}
-		a.magazinCombo.Configure(tk.Textvariable("выбери магазин"), tk.Values(model.Magazins))
 	default:
 	}
 }

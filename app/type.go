@@ -10,7 +10,8 @@ import (
 
 	"alcoscanxlsx/config"
 	"alcoscanxlsx/domain"
-	"alcoscanxlsx/repo"
+
+	// "alcoscanxlsx/repo"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,8 +33,8 @@ type app struct {
 	pwd       string
 	startTime time.Time
 	endTime   time.Time
-	repo      *repo.Repository
-	output    string
+	// repo      *repo.Repository
+	output string
 }
 
 var _ domain.Apper = (*app)(nil)
@@ -96,9 +97,9 @@ func (a *app) EndDate() time.Time {
 	return a.endTime
 }
 
-func (a *app) SetRepo(repo *repo.Repository) {
-	a.repo = repo
-}
+// func (a *app) SetRepo(repo *repo.Repository) {
+// 	a.repo = repo
+// }
 
 func (a *app) FsrarID() string {
 	return a.Config().Configuration().Application.Fsrarid
@@ -112,9 +113,9 @@ func (a *app) Pwd() string {
 	return a.pwd
 }
 
-func (a *app) Repo() *repo.Repository {
-	return a.repo
-}
+// func (a *app) Repo() *repo.Repository {
+// 	return a.repo
+// }
 
 func (a *app) Output() string {
 	return a.output

@@ -53,19 +53,20 @@ func (a *GuiApp) makeLog() {
 func (a *GuiApp) makeInputs(model *application.Application) {
 	a.inputFrame = tk.TFrame()
 	a.fileBtn = a.inputFrame.TButton(tk.Txt("Открыть файл..."), tk.Command(func() {
-		ff := utility.DialogOpenFileXlsx()
-		if ff != "Cancelled" {
-			go a.openXlsx(ff)
+		ff, err := utility.DialogSelectDir(".")
+		if err != nil {
+			a.logg("", err.Error())
+			return
 		}
+		go a.openInDir(ff)
 	}))
 
-	file := model.File
+	file := model.InDir
 	if file != "" {
-		file = filepath.Base(model.File)
+		file = filepath.Base(model.InDir)
 	}
 	a.fileLbl = a.inputFrame.TLabel(tk.Txt(file))
-	a.progres = a.inputFrame.TProgressbar()
-	a.magazinCombo = a.inputFrame.TCombobox(tk.State("readonly"), tk.Textvariable("выбери магазин"), tk.Values([]string{}))
+	// a.progres = a.inputFrame.TProgressbar()
 }
 
 func (a *GuiApp) makeButtons() {

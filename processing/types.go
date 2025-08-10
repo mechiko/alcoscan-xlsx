@@ -4,19 +4,28 @@ import (
 	"alcoscanxlsx/domain"
 	"alcoscanxlsx/domain/models/application"
 	"alcoscanxlsx/reductor"
+	"alcoscanxlsx/utility"
 	"fmt"
 )
-
-// const startSSCC = "1462709225" // gs1 rus id zapivkom для памяти запивком
 
 type Processing struct {
 	domain.Apper
 	warnings []string
 	errors   []string
+
+	files     []string
+	outDir    string
+	Korob     map[string][]*utility.CisInfo
+	Palet     map[string][]string
+	PaletSort []string
 }
 
 func New(app domain.Apper) (*Processing, error) {
-	return nil, nil
+	k := &Processing{
+		Apper: app,
+	}
+	k.Reset()
+	return k, nil
 }
 
 func (k *Processing) AddWarn(warn string) {
@@ -36,6 +45,9 @@ func (k *Processing) Errors() []string {
 }
 
 func (k *Processing) Reset() {
+	k.Korob = make(map[string][]*utility.CisInfo)
+	k.Palet = make(map[string][]string)
+	k.PaletSort = make([]string, 0)
 	k.errors = make([]string, 0)
 	k.warnings = make([]string, 0)
 }
