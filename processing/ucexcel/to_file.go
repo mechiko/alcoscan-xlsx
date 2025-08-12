@@ -45,3 +45,16 @@ func (ue *ucexcel) ToFileSimple() error {
 
 	return err
 }
+
+func (ue *ucexcel) ToAbsSimple() error {
+	file, err := os.OpenFile(ue.name, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0660)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	defer file.Close()
+
+	if _, err := ue.file.WriteTo(file); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	return nil
+}

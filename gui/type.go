@@ -42,13 +42,13 @@ type GuiApp struct {
 	exitButton  *tk.TButtonWidget
 	logCh       chan LogMsg
 	// stateFinishOpenXlsx   chan struct{}
-	stateFinish           chan struct{}
-	stateStart            chan struct{}
-	logClear              chan struct{}
-	stateSelectedFileXlsx chan string
-	stateIsProcess        chan bool
-	yscroll               *tk.Window
-	logText               *tk.TextWidget
+	stateFinish        chan struct{}
+	stateStart         chan struct{}
+	logClear           chan struct{}
+	stateSelectedInDir chan string
+	stateIsProcess     chan bool
+	yscroll            *tk.Window
+	logText            *tk.TextWidget
 
 	processing *processing.Processing
 	fileLbl    *tk.TLabelWidget
@@ -56,7 +56,7 @@ type GuiApp struct {
 
 	progres   *tk.TProgressbarWidget
 	progresCh chan float64
-	isProces  bool
+	isProcess bool
 }
 
 func New(p *processing.Processing, app domain.Apper) (*GuiApp, error) {
@@ -70,12 +70,12 @@ func New(p *processing.Processing, app domain.Apper) (*GuiApp, error) {
 	a.icon = tk.NewPhoto(tk.Data(ico))
 	a.progresCh = make(chan float64)
 	a.logClear = make(chan struct{})
-	a.stateSelectedFileXlsx = make(chan string, 2)
+	a.stateSelectedInDir = make(chan string, 2)
 	a.stateIsProcess = make(chan bool, 2)
 
 	tk.App.IconPhoto(a.icon)
 	tk.ErrorMode = tk.CollectErrors
-	tk.App.WmTitle("Заказы из таблицы")
+	tk.App.WmTitle("Формирование отчета по файлам агрегации АлкоСкан")
 	tk.WmProtocol(tk.App, "WM_DELETE_WINDOW", a.onQuitApp)
 	if err := tk.ActivateTheme("azure light"); err != nil {
 		a.Logger().Errorf("gui theme %s", err.Error())
@@ -116,7 +116,7 @@ func (a *GuiApp) logg(s, e string) {
 }
 
 func (a *GuiApp) onQuitApp() {
-	if a.isProces {
+	if a.isProcess {
 		a.logg("", "выход из программы ограничен, запущена обработка")
 		return
 	}
@@ -149,11 +149,14 @@ func (a *GuiApp) tick() {
 		a.fileBtn.Configure(tk.State("enabled"))
 		a.startButton.Configure(tk.State("disabled"))
 		a.exitButton.Configure(tk.State("enabled"))
-	case file := <-a.stateSelectedFileXlsx:
+	case file := <-a.stateSelectedInDir:
 		a.fileLbl.Configure(tk.Txt(file))
-	case a.isProces = <-a.stateIsProcess:
-		if a.isProces {
-			a.startButton.Configure(tk.State("disabled"))
+		a.progres.Configure(tk.Value(0))
+		a.fileBtn.Configure(tk.State("enabled"))
+		a.startButton.Configure(tk.State("enabled"))
+		a.exitButton.Configure(tk.State("enabled"))
+	case a.isProcess = <-a.stateIsProcess:
+		if a.isProcess {
 			a.fileBtn.Configure(tk.State("disabled"))
 		} else {
 			a.fileBtn.Configure(tk.State("enabled"))

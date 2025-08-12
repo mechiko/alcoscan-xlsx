@@ -52,11 +52,6 @@ func (c *Config) SetInConfig(key string, value interface{}) error {
 	if err := c.Unmarshal(c.configuration); err != nil {
 		return fmt.Errorf("Viper.Unmarshal(c.Configuration) %w", err)
 	}
-	// if save {
-	// 	if err := c.Save(); err != nil {
-	// 		return fmt.Errorf("%s %w", modError, err)
-	// 	}
-	// }
 	return nil
 }
 

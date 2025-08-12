@@ -49,6 +49,5 @@ func New(name string) *ucexcel {
 			Size:   9,
 		},
 	}
-
 	return excel
 }

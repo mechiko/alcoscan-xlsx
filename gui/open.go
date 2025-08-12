@@ -12,5 +12,4 @@ func Open(url string) error {
 // открываем в эксплорере текущую папку программы
 func OpenDir(dir string) (err error) {
 	return utility.OpenFileInShell(dir)
-	return nil
 }

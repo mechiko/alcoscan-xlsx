@@ -6,21 +6,26 @@ import (
 	"path/filepath"
 )
 
-const defaultNameOutput = "ПалетыКороба"
-
 func (k *Processing) Proccess(name string) error {
 	if name == "" {
-		name = defaultNameOutput
+		return fmt.Errorf("имя файла не указано")
 	}
-	name = filepath.Join(k.outDir, name)
+	if !filepath.IsAbs(name) {
+		return fmt.Errorf("имя файла не абсолютное %s", name)
+	}
 	excel := ucexcel.New(name)
-	if err := excel.Open(); err != nil {
+	// так создается файл
+	if excelFile, err := excel.Open(); err != nil {
 		return fmt.Errorf("%w", err)
+	} else {
+		_ = excelFile.SetColWidth("Sheet1", "A", "D", 30)
+		_ = excelFile.SetColWidth("Sheet1", "B", "B", 40)
 	}
+
 	if err := excel.UtilizationPalet(k.Palet, k.Korob, k.PaletSort); err != nil {
 		return fmt.Errorf("%w", err)
 	}
-	if err := excel.SaveSimple(); err != nil {
+	if err := excel.ToAbsSimple(); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 	return nil

@@ -13,8 +13,8 @@ type Processing struct {
 	warnings []string
 	errors   []string
 
-	files     []string
-	outDir    string
+	Files     []string
+	OutDir    string
 	Korob     map[string][]*utility.CisInfo
 	Palet     map[string][]string
 	PaletSort []string

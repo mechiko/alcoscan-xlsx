@@ -3,28 +3,30 @@ package processing
 import (
 	"alcoscanxlsx/utility"
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"slices"
 	"strings"
 )
 
 func (k *Processing) Scan() error {
-	for _, file := range k.files {
+	for _, file := range k.Files {
 		if strings.Contains(file, "_АРМ") {
 			if err := k.korobTxtFile(file); err != nil {
-				k.AddError(err.Error())
+				return err
 			}
 		}
 		if strings.Contains(file, "_Паллет") {
 			if err := k.paletTxtFile(file); err != nil {
-				k.AddError(err.Error())
+				return err
 			}
 		}
 	}
-	if len(k.Errors()) > 0 {
-		return errors.New("есть ошибки")
+	for pp := range k.Palet {
+		k.PaletSort = append(k.PaletSort, pp)
 	}
+	slices.Sort(k.PaletSort)
 	return nil
 }
 
@@ -52,7 +54,7 @@ func (k *Processing) korobTxtFile(file string) error {
 	for i, row := range arrKorob {
 		cis, err := utility.ParseCisInfo(row[1])
 		if err != nil {
-			return fmt.Errorf("файл [%s] номер строки %d [%s]", file, i+1, row[1])
+			return fmt.Errorf("файл [%.20s] номер строки %d [%s] %w", filepath.Base(file), i+1, row[1], err)
 		}
 		krb := row[0]
 		cisKorob, _ := utility.ParseCisInfo(row[0])

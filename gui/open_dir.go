@@ -18,7 +18,6 @@ func (a *GuiApp) openInDir(ff string) {
 		a.stateIsProcess <- false
 	}()
 	file := filepath.Base(ff)
-	a.stateSelectedFileXlsx <- file
 	model, err := GetModel()
 	if err != nil {
 		a.Logger().Errorf("gui openXlsx %w", err)
@@ -32,6 +31,9 @@ func (a *GuiApp) openInDir(ff string) {
 	err = reductor.Instance().SetModel(model, false)
 	if err != nil {
 		a.Logger().Errorf("gui openXlsx %w", err)
+		a.SendError(fmt.Sprintf("ошибка загрузки файлов: %s", err.Error()))
+		a.stateStart <- struct{}{}
+		return
 	}
 	a.SendLog("считываем файлы палет и коробов")
 	err = a.processing.ReadDir(reInDir, model.InDir)
@@ -40,20 +42,18 @@ func (a *GuiApp) openInDir(ff string) {
 		a.stateStart <- struct{}{}
 		return
 	}
-	a.SendLog("обрабатываем файлы...")
-	err = a.processing.Scan()
-	if err != nil {
-		a.SendError(fmt.Sprintf("ошибка загрузки файлов: %s", err.Error()))
-		if len(a.processing.Errors()) > 0 {
-			// ошибки проверки данных таблицы выводим в лог
-			for _, e := range a.processing.Errors() {
-				a.SendError(e)
-			}
-			a.stateStart <- struct{}{}
-			return
-		}
+	if len(a.processing.Files) < 2 {
+		// должны быть хотя бы два файла, короба и палеты
+		a.SendError(fmt.Sprintf("ошибка мало файлов, найдено только %d", len(a.processing.Files)))
+		a.stateStart <- struct{}{}
+		return
 	}
-	a.SendLog("обработаны файлы")
-	// успешное открытие файла
-	a.stateStart <- struct{}{}
+	a.SendLog(fmt.Sprintf("найдены %d файла(ы):", len(a.processing.Files)))
+	for _, file := range a.processing.Files {
+		baseFile := filepath.Base(file)
+		a.SendLog(fmt.Sprintf("- %.50s...%s", baseFile, filepath.Ext(baseFile)))
+		// a.SendLog(fmt.Sprintf("- %s", baseFile))
+	}
+	// устанавливаем состояни для пуск
+	a.stateSelectedInDir <- file
 }

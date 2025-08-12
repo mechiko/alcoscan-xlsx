@@ -52,7 +52,7 @@ func (a *GuiApp) makeLog() {
 
 func (a *GuiApp) makeInputs(model *application.Application) {
 	a.inputFrame = tk.TFrame()
-	a.fileBtn = a.inputFrame.TButton(tk.Txt("Открыть файл..."), tk.Command(func() {
+	a.fileBtn = a.inputFrame.TButton(tk.Txt("Открыть каталог входных файлов"), tk.Command(func() {
 		ff, err := utility.DialogSelectDir(".")
 		if err != nil {
 			a.logg("", err.Error())
@@ -60,19 +60,21 @@ func (a *GuiApp) makeInputs(model *application.Application) {
 		}
 		go a.openInDir(ff)
 	}))
-
 	file := model.InDir
 	if file != "" {
 		file = filepath.Base(model.InDir)
 	}
 	a.fileLbl = a.inputFrame.TLabel(tk.Txt(file))
-	// a.progres = a.inputFrame.TProgressbar()
+	a.progres = a.inputFrame.TProgressbar()
 }
 
 func (a *GuiApp) makeButtons() {
 	a.buttonFrame = tk.TFrame()
 	a.exitButton = a.buttonFrame.TExit(tk.Txt("Выход"))
 	a.startButton = a.buttonFrame.TButton(tk.Txt("Пуск"), tk.State("disabled"), tk.Command(func() {
+		if a.isProcess {
+			return
+		}
 		a.startButton.Configure(tk.State("disabled"))
 		a.exitButton.Configure(tk.State("disabled"))
 		go a.generate()
