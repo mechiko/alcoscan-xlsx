@@ -137,6 +137,8 @@ distbin/
 .nevakod/
 .dist/
 .data/
+in/
+out/
 
 # Binaries for programs and plugins
 *.exe
@@ -151,7 +153,3 @@ distbin/
 *.db
 *.db.*
 *.db-*
-
-/test
-
-
