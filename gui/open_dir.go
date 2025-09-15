@@ -10,14 +10,13 @@ import (
 var reInDir = regexp.MustCompile(`.*\.csv$`)
 
 // должна выполнятся как gorutine
-func (a *GuiApp) openInDir(ff string) {
+func (a *GuiApp) openInDir(inDir string) {
 	// очистка лога на экране
 	a.logClear <- struct{}{}
 	a.stateIsProcess <- true
 	defer func() {
 		a.stateIsProcess <- false
 	}()
-	file := filepath.Base(ff)
 	model, err := GetModel()
 	if err != nil {
 		a.Logger().Errorf("gui openXlsx %w", err)
@@ -27,7 +26,7 @@ func (a *GuiApp) openInDir(ff string) {
 	}
 	// сброс модели
 	model.Reset()
-	model.InDir = ff
+	model.InDir = inDir
 	err = reductor.Instance().SetModel(model, false)
 	if err != nil {
 		a.Logger().Errorf("gui openXlsx %w", err)
@@ -55,5 +54,5 @@ func (a *GuiApp) openInDir(ff string) {
 		// a.SendLog(fmt.Sprintf("- %s", baseFile))
 	}
 	// устанавливаем состояни для пуск
-	a.stateSelectedInDir <- file
+	a.stateSelectedInDir <- filepath.Base(inDir)
 }

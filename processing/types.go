@@ -13,11 +13,13 @@ type Processing struct {
 	warnings []string
 	errors   []string
 
-	Files     []string
-	OutDir    string
-	Korob     map[string][]*utility.CisInfo
-	Palet     map[string][]string
-	PaletSort []string
+	Files            []string
+	OutDir           string
+	Korob            map[string][]*utility.CisInfo
+	Palet            map[string][]string
+	AllKorobaInPalet map[string]string
+	PaletSort        []string
+	KorobLost        []string
 }
 
 func New(app domain.Apper) (*Processing, error) {
