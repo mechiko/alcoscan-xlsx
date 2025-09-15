@@ -20,11 +20,7 @@ func OpenFileInShell(path string) error {
 	if !strings.HasPrefix(urlPath, "/") {
 		urlPath = "/" + urlPath
 	}
-	fileURL := &url.URL{
-		Scheme: "file",
-		Path:   urlPath,
-	}
-	return startShell(fileURL.String())
+	return startShell("file://" + urlPath)
 }
 
 // открыть ссылку в браузере

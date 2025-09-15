@@ -2,52 +2,93 @@ package utility
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/sqweek/dialog"
 )
 
-func DialogOpenFileXlsx() string {
-	result, err := dialog.File().Filter("Excel", "xlsx").Filter("all", "*").Load()
-	if err != nil {
-		return err.Error()
+type FileType string
+
+const (
+	Excel FileType = "xlsx"
+	Txt   FileType = "txt"
+	Csv   FileType = "csv"
+	DB    FileType = "db"
+	All   FileType = "all"
+)
+
+// func isValidFileType(s FileType) bool {
+// 	switch s {
+// 	case Excel, Csv, Txt:
+// 		return true
+// 	default:
+// 		return false
+// 	}
+// }
+
+func DialogOpenFile(fileType []FileType, name string, wd string) (string, error) {
+	if wd == "." {
+		dir, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		wd = dir
 	}
-	return result
+	dlg := dialog.File().SetStartDir(wd).SetStartFile(name)
+	for _, t := range fileType {
+		switch t {
+		case Excel:
+			dlg.Filter("Excel", "xlsx")
+		case Csv:
+			dlg.Filter("CSV", "csv")
+		case Txt:
+			dlg.Filter("Txt", "txt")
+		case All:
+			dlg.Filter("All", "*")
+		}
+	}
+	result, err := dlg.Load()
+	if err != nil {
+		return "", fmt.Errorf("%w", err)
+	}
+	if result == "Cancelled" {
+		return "", fmt.Errorf("диалог выбора отменен")
+	}
+	return result, nil
 }
 
-func DialogOpenFileCsv() string {
-	result, err := dialog.File().Filter("csv", "csv").Filter("txt", "txt").Filter("all", "*").Load()
-	if err != nil {
-		return err.Error()
+func DialogSaveFile(fileType FileType, name string, wd string) (string, error) {
+	if wd == "." {
+		dir, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		wd = dir
 	}
-	return result
-}
-
-func DialogOpenFileDb() string {
-	result, err := dialog.File().Filter("db", "db").Filter("all", "*").Load()
-	if err != nil {
-		return err.Error()
+	dlg := dialog.File().SetStartDir(wd).SetStartFile(name)
+	switch fileType {
+	case Excel:
+		dlg.Filter("Excel", "xlsx")
+	case Csv:
+		dlg.Filter("CSV", "csv")
+	case Txt:
+		dlg.Filter("Txt", "txt")
 	}
-	return result
-}
-
-func DialogOpenFileTxt() string {
-	result, err := dialog.File().Filter("txt", "txt").Filter("all", "*").Load()
+	result, err := dlg.Save()
 	if err != nil {
-		return err.Error()
+		return "", fmt.Errorf("%w", err)
 	}
-	return result
-}
-
-func DialogSaveFile() string {
-	result, err := dialog.File().Filter("Excel", "xlsx").Filter("all", "*").Save()
-	if err != nil {
-		return err.Error()
+	if result == "Cancelled" {
+		return "", fmt.Errorf("диалог выбора отменен")
 	}
-	return result
+	return result, nil
 }
 
 func MessageBox(title, msg string) {
+	if msg == "" {
+		return
+	}
 	dialog.Message("%s", msg).Title(title).Info()
 }
 
@@ -64,7 +105,7 @@ func DialogSelectDir(wd string) (string, error) {
 		return "", err
 	}
 	if directory == "Cancelled" {
-		return "", errors.New("прерван диалог выбора")
+		return "", errors.New("прерван диалог выбора каталога")
 	}
 	return directory, nil
 }

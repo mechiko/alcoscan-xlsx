@@ -17,9 +17,6 @@ import (
 	"path/filepath"
 )
 
-const modError = "main"
-
-// var version = "0.0.0"
 var fileExe string
 var dir string
 

@@ -1,6 +1,8 @@
 module alcoscanxlsx
 
-go 1.24.3
+go 1.24
+
+toolchain go1.24.6
 
 require (
 	github.com/google/uuid v1.6.0
